@@ -3,11 +3,17 @@ import { Perlin } from "../utils/proc-noise";
 import { Alea } from "../utils/alea";
 import { GameSettings } from "../types/GameSettings";
 
+interface PlayerPosition {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export const useGameLogic = (settings: GameSettings) => {
-  const [perlin] = useState(() => Perlin());
+  const [perlin] = useState(() => new Perlin());
   const [alea] = useState(() => Alea());
-  const [gameMode, setGameMode] = useState(settings.mode);
-  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 5, z: 0 });
+  const [gameMode, setGameMode] = useState<GameSettings['mode']>(settings.mode);
+  const [playerPosition, setPlayerPosition] = useState<PlayerPosition>({ x: 0, y: 5, z: 0 });
 
   const initializeEnvironment = useCallback(() => {
     alea();
@@ -22,7 +28,7 @@ export const useGameLogic = (settings: GameSettings) => {
   }, []);
 
   const updatePlayerPosition = useCallback(
-    (delta: number) => {
+    (delta: number): PlayerPosition => {
       if (gameMode === "drive") {
         // Update player position for drive mode
         setPlayerPosition((prev) => ({
