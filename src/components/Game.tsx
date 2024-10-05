@@ -36,7 +36,7 @@ export const Game: React.FC = () => {
     </div>
   )
 }
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ThreeCanvas from './ThreeCanvas'
 import Terminal from './Terminal'
 import Controls from './Controls'
@@ -57,6 +57,19 @@ export const Game: React.FC = () => {
   const handleSettingsChange = (newSettings: GameSettings) => {
     setGameSettings(newSettings)
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowSettings(!showSettings)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showSettings])
 
   return (
     <div className="game-container">
