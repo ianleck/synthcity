@@ -1,9 +1,13 @@
 body {
   margin: 0;
   overflow: hidden;
+  background-color: #000000;
+  color: #00ff00;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
 }
 
-#blocker, #crashMessage {
+#blocker {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -11,9 +15,148 @@ body {
 }
 
 #container {
-  /* Add styles for the container */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 1200px;
+  height: 600px;
+  background-color: rgba(0,0,0,0.75);
+  border: 1px solid #00ff00;
+  display: flex;
+}
+
+.tCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.leftCol {
+  width: 540px;
+  border-right: 1px solid #00ff00;
+}
+
+.rightCol {
+  flex-grow: 1;
+}
+
+.tRow {
+  border-bottom: 1px solid #00ff00;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tHeader {
+  background-color: #00ff00;
+  color: #000000;
+  padding: 5px;
+}
+
+#terminal, #resources, #settings, #controls {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+#cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+#enterBtn {
+  width: 100%;
+  height: 100%;
+  background-color: #00ff00;
+  color: #000000;
+  border: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#enterBtn:hover {
+  background-color: #00cc00;
+}
+
+.formCheckContainer {
+  display: inline-block;
+  position: relative;
+  padding-left: 25px;
+  margin-right: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.formCheckContainer input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #000;
+  border: 1px solid #00ff00;
+}
+
+.formCheckContainer:hover input ~ .checkmark {
+  background-color: #003300;
+}
+
+.formCheckContainer input:checked ~ .checkmark {
+  background-color: #00ff00;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.formCheckContainer input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.formCheckContainer .checkmark:after {
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #000;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+#crashMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0,0,0,0.75);
+  border: 1px solid #ff0000;
+  padding: 20px;
+  text-align: center;
 }
 
 .g1 {
-  /* Add styles for the crash message */
+  color: #ff0000;
+  font-size: 24px;
+}
+
+#canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
