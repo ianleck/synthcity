@@ -64,12 +64,12 @@ export class Perlin {
       }
     }
 
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-    const zi = Math.floor(z);
-    const xf = x - xi;
-    const yf = y - yi;
-    const zf = z - zi;
+    let xi = Math.floor(x);
+    let yi = Math.floor(y);
+    let zi = Math.floor(z);
+    let xf = x - xi;
+    let yf = y - yi;
+    let zf = z - zi;
     let r = 0;
     let ampl = 0.5;
 
@@ -77,20 +77,26 @@ export class Perlin {
       let of = xi + (yi << this.PERLIN_YWRAPB) + (zi << this.PERLIN_ZWRAPB);
       const rxf = this.noise_fsc(xf);
       const ryf = this.noise_fsc(yf);
-      
+
       let n1 = this.perlin_array[of & this.PERLIN_SIZE];
       n1 += rxf * (this.perlin_array[(of + 1) & this.PERLIN_SIZE] - n1);
       let n2 = this.perlin_array[(of + this.PERLIN_YWRAP) & this.PERLIN_SIZE];
-      n2 += rxf * (this.perlin_array[(of + this.PERLIN_YWRAP + 1) & this.PERLIN_SIZE] - n2);
+      n2 +=
+        rxf *
+        (this.perlin_array[(of + this.PERLIN_YWRAP + 1) & this.PERLIN_SIZE] -
+          n2);
       n1 += ryf * (n2 - n1);
-      
+
       of += this.PERLIN_ZWRAP;
       n2 = this.perlin_array[of & this.PERLIN_SIZE];
       n2 += rxf * (this.perlin_array[(of + 1) & this.PERLIN_SIZE] - n2);
       let n3 = this.perlin_array[(of + this.PERLIN_YWRAP) & this.PERLIN_SIZE];
-      n3 += rxf * (this.perlin_array[(of + this.PERLIN_YWRAP + 1) & this.PERLIN_SIZE] - n3);
+      n3 +=
+        rxf *
+        (this.perlin_array[(of + this.PERLIN_YWRAP + 1) & this.PERLIN_SIZE] -
+          n3);
       n2 += ryf * (n3 - n2);
-      
+
       n1 += this.noise_fsc(zf) * (n2 - n1);
       r += n1 * ampl;
       ampl *= this.perlin_amp_falloff;
@@ -100,10 +106,19 @@ export class Perlin {
       yf *= 2;
       zi <<= 1;
       zf *= 2;
-      
-      if (xf >= 1) { xi++; xf--; }
-      if (yf >= 1) { yi++; yf--; }
-      if (zf >= 1) { zi++; zf--; }
+
+      if (xf >= 1) {
+        xi++;
+        xf--;
+      }
+      if (yf >= 1) {
+        yi++;
+        yf--;
+      }
+      if (zf >= 1) {
+        zi++;
+        zf--;
+      }
     }
     return r;
   }

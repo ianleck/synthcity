@@ -13,28 +13,32 @@ import {
   AmbientLight,
   PointLight,
   Audio,
-  AudioListener
-} from 'three';
+  AudioListener,
+} from "three";
 
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 
-import { assetLoader } from './AssetLoader';
-import { Player } from './Player';
-import { PlayerCar } from './PlayerCar';
-import { PlayerController } from './PlayerController';
-import { Radio } from './Radio';
-import { Generator } from './Generator';
-import { GeneratorItem_CityBlock } from './GeneratorItem_CityBlock';
-import { GeneratorItem_CityLight } from './GeneratorItem_CityLight';
-import { GeneratorItem_Traffic } from './GeneratorItem_Traffic';
-import { Collider } from './Collider';
+import { assetLoader } from "./AssetLoader";
+import { Player } from "./Player";
+import { PlayerCar } from "./PlayerCar";
+import { PlayerController } from "./PlayerController";
+import { Radio } from "./Radio";
+import { Generator } from "./Generator";
+import { GeneratorItem_CityBlock } from "./GeneratorItem_CityBlock";
+import { GeneratorItem_CityLight } from "./GeneratorItem_CityLight";
+import { GeneratorItem_Traffic } from "./GeneratorItem_Traffic";
+import { Collider } from "./Collider";
 
-import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+import {
+  computeBoundsTree,
+  disposeBoundsTree,
+  acceleratedRaycast,
+} from "three-mesh-bvh";
 
 export class Game {
   private canvas: HTMLCanvasElement;
@@ -48,10 +52,15 @@ export class Game {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.scene = new Scene();
-    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera = new PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000,
+    );
     this.renderer = new WebGLRenderer({ canvas: this.canvas });
     this.clock = new Clock();
-    
+
     // Initialize other properties as needed
   }
 
@@ -60,7 +69,7 @@ export class Game {
       this.assets = await assetLoader.loadAllAssets();
       this.init();
     } catch (error) {
-      console.error('Failed to load assets:', error);
+      console.error("Failed to load assets:", error);
     }
   }
 
@@ -90,12 +99,19 @@ export class Game {
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
 
-    const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    const bloomPass = new UnrealBloomPass(
+      new Vector2(window.innerWidth, window.innerHeight),
+      1.5,
+      0.4,
+      0.85,
+    );
     this.composer.addPass(bloomPass);
 
     const fxaaPass = new ShaderPass(FXAAShader);
-    fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * window.devicePixelRatio);
-    fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * window.devicePixelRatio);
+    fxaaPass.material.uniforms["resolution"].value.x =
+      1 / (window.innerWidth * window.devicePixelRatio);
+    fxaaPass.material.uniforms["resolution"].value.y =
+      1 / (window.innerHeight * window.devicePixelRatio);
     this.composer.addPass(fxaaPass);
 
     // Initialize game objects, player, etc.
