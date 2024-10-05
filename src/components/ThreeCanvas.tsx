@@ -4,18 +4,16 @@ import Perlin from '../utils/proc-noise';
 import Alea from '../utils/alea';
 import Terminal from './Terminal';
 import Controls from './Controls';
+import Settings from './Settings';
+import Credits from './Credits';
 import { curatedWorldSeeds, isMobile } from '../utils/ui-utils';
-
-declare global {
-  interface Window {
-    game: any;
-    userSettings: any;
-  }
-}
 
 const ThreeCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameMode, setGameMode] = useState<'drive' | 'freeroam'>('drive');
+  const [showSettings, setShowSettings] = useState(true);
+  const [showCredits, setShowCredits] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     if (canvasRef.current && typeof window !== 'undefined') {
@@ -68,6 +66,17 @@ const ThreeCanvas: React.FC = () => {
 
           window.addEventListener('resize', handleResize);
 
+          // Simulate asset loading
+          let progress = 0;
+          const loadingInterval = setInterval(() => {
+            progress += 10;
+            setLoadingProgress(progress);
+            if (progress >= 100) {
+              clearInterval(loadingInterval);
+              setShowSettings(false);
+            }
+          }, 500);
+
           // Clean up function
           return () => {
             window.removeEventListener('resize', handleResize);
@@ -75,6 +84,7 @@ const ThreeCanvas: React.FC = () => {
             geometry.dispose();
             material.dispose();
             renderer.dispose();
+            clearInterval(loadingInterval);
           };
         },
 
@@ -92,12 +102,6 @@ const ThreeCanvas: React.FC = () => {
         }
       };
 
-      // Initialize user settings
-      window.userSettings = {
-        worldSeed: curatedWorldSeeds[Math.floor(Math.random() * curatedWorldSeeds.length)],
-        mode: gameMode,
-      };
-
       // Check if mobile
       if (isMobile()) {
         console.error('Mobile devices not supported');
@@ -112,13 +116,40 @@ const ThreeCanvas: React.FC = () => {
         if (cleanup) cleanup();
       };
     }
-  }, [gameMode]);
+  }, []);
+
+  const handleSettingsChange = (settings: any) => {
+    setGameMode(settings.mode);
+    window.userSettings = settings;
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setShowSettings(!showSettings);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showSettings]);
 
   return (
     <>
       <canvas ref={canvasRef} id="canvas" />
       <Terminal />
       <Controls mode={gameMode} />
+      {showSettings && (
+        <Settings onSettingsChange={handleSettingsChange} />
+      )}
+      {showCredits && <Credits />}
+      {loadingProgress < 100 && (
+        <div id="loading-progress">
+          Loading: {loadingProgress}%
+        </div>
+      )}
     </>
   );
 };
