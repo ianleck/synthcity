@@ -9,6 +9,29 @@ import Settings from './Settings';
 import Credits from './Credits';
 import { curatedWorldSeeds, isMobile } from '../utils/ui-utils';
 
+interface GameType {
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  renderer: THREE.WebGLRenderer;
+  perlin: any;
+  alea: any;
+  player: THREE.Object3D | null;
+  audioListener: THREE.AudioListener;
+  backgroundMusic: THREE.Audio;
+  load: () => void;
+  initializeEnvironment: () => void;
+  initializePlayer: () => void;
+  initializeAudio: () => void;
+  update: () => void;
+}
+
+declare global {
+  interface Window {
+    game: GameType;
+    userSettings: any;
+  }
+}
+
 const ThreeCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameMode, setGameMode] = useState<'drive' | 'freeroam'>('drive');
@@ -21,7 +44,7 @@ const ThreeCanvas: React.FC = () => {
       const canvas = canvasRef.current;
       
       // Initialize the game
-      window.game = {
+      const game: GameType = {
         scene: new THREE.Scene(),
         camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer: new THREE.WebGLRenderer({ canvas }),
@@ -31,7 +54,7 @@ const ThreeCanvas: React.FC = () => {
         audioListener: new THREE.AudioListener(),
         backgroundMusic: new THREE.Audio(new THREE.AudioListener()),
 
-        load: () => {
+        load: function() {
           console.log('Game loading...');
           const { scene, camera, renderer } = window.game;
 
@@ -101,7 +124,7 @@ const ThreeCanvas: React.FC = () => {
           };
         },
 
-        initializeEnvironment: () => {
+        initializeEnvironment: function() {
           const { scene, perlin } = window.game;
 
           // Add ambient light
@@ -146,7 +169,7 @@ const ThreeCanvas: React.FC = () => {
           }
         },
 
-        initializePlayer: () => {
+        initializePlayer: function() {
           const { scene, camera, player } = window.game;
           if (gameMode === 'drive' && player) {
             player.add(camera);
@@ -161,7 +184,7 @@ const ThreeCanvas: React.FC = () => {
           }
         },
 
-        initializeAudio: () => {
+        initializeAudio: function() {
           const { scene, camera, audioListener, backgroundMusic } = window.game;
           
           // Add audio listener to the camera
@@ -190,7 +213,7 @@ const ThreeCanvas: React.FC = () => {
           }
         },
 
-        update: () => {
+        update: function() {
           const { player, camera } = window.game;
           const time = Date.now() * 0.001;
 
@@ -216,7 +239,8 @@ const ThreeCanvas: React.FC = () => {
       }
 
       // Load the game
-      const cleanup = window.game.load();
+      window.game = game;
+      const cleanup = game.load();
 
       // Clean up on component unmount
       return () => {

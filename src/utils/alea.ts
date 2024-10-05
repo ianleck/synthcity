@@ -1,6 +1,6 @@
 // From http://baagoe.com/en/RandomMusings/javascript/
-export const Alea = () => {
-  return (function (this: any, ...args: any[]) {
+export function Alea() {
+  return function (this: any, ...args: any[]) {
     // Johannes Baagoe <baagoe@baagoe.com>, 2010
     let s0 = 0;
     let s1 = 0;

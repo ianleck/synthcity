@@ -5,7 +5,7 @@
 
 import { Alea } from './alea';
 
-export const Perlin = (seed?: number) => {
+export function Perlin(seed?: number) {
 	if (seed != undefined) {
 		this.alea_rand = new Alea(seed); // use provided seed
 	} else {
