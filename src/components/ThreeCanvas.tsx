@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import Perlin from '../utils/proc-noise';
 import Alea from '../utils/alea';
+import Terminal from './Terminal';
+import Controls from './Controls';
+import { curatedWorldSeeds, isMobile } from '../utils/ui-utils';
 
 declare global {
   interface Window {
@@ -12,6 +15,7 @@ declare global {
 
 const ThreeCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameMode, setGameMode] = useState<'drive' | 'freeroam'>('drive');
 
   useEffect(() => {
     if (canvasRef.current && typeof window !== 'undefined') {
@@ -90,8 +94,15 @@ const ThreeCanvas: React.FC = () => {
 
       // Initialize user settings
       window.userSettings = {
-        // Add user-configurable settings here
+        worldSeed: curatedWorldSeeds[Math.floor(Math.random() * curatedWorldSeeds.length)],
+        mode: gameMode,
       };
+
+      // Check if mobile
+      if (isMobile()) {
+        console.error('Mobile devices not supported');
+        return;
+      }
 
       // Load the game
       const cleanup = window.game.load();
@@ -101,9 +112,15 @@ const ThreeCanvas: React.FC = () => {
         if (cleanup) cleanup();
       };
     }
-  }, []);
+  }, [gameMode]);
 
-  return <canvas ref={canvasRef} id="canvas" />;
+  return (
+    <>
+      <canvas ref={canvasRef} id="canvas" />
+      <Terminal />
+      <Controls mode={gameMode} />
+    </>
+  );
 };
 
 export default ThreeCanvas;
