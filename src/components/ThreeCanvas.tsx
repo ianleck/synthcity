@@ -1,35 +1,62 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
+declare global {
+  interface Window {
+    game: any;
+    userSettings: any;
+  }
+}
+
 const ThreeCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (canvasRef.current) {
+    if (canvasRef.current && typeof window !== 'undefined') {
       const canvas = canvasRef.current;
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ canvas });
+      
+      // Initialize the game
+      window.game = {
+        load: () => {
+          console.log('Game loading...');
+          // Here you would typically initialize your Three.js scene, camera, renderer, etc.
+          const scene = new THREE.Scene();
+          const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+          const renderer = new THREE.WebGLRenderer({ canvas });
 
-      renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setSize(window.innerWidth, window.innerHeight);
 
-      const animate = () => {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
+          const animate = () => {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+          };
+
+          animate();
+
+          const handleResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+          };
+
+          window.addEventListener('resize', handleResize);
+
+          // Clean up function
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        }
       };
 
-      animate();
+      // Initialize user settings
+      window.userSettings = {};
 
-      const handleResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
+      // Load the game
+      const cleanup = window.game.load();
 
-      window.addEventListener('resize', handleResize);
-
+      // Clean up on component unmount
       return () => {
-        window.removeEventListener('resize', handleResize);
+        if (cleanup) cleanup();
       };
     }
   }, []);

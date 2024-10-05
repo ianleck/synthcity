@@ -116,9 +116,9 @@ export default function Home() {
         <ThreeCanvas />
       </main>
       <Script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossOrigin="anonymous" />
-      <Script src="/js/ui-v3.js" />
       <Script src="/js/alea.js" />
       <Script src="/js/proc-noise.js" />
+      <Script src="/js/ui-v3.js" />
     </>
   )
 }
