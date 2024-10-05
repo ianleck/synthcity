@@ -1,6 +1,6 @@
 // From http://baagoe.com/en/RandomMusings/javascript/
 export function Alea() {
-  return function (this: any, ...args: any[]) {
+  return (function (this: any, ...args: any[]) {
     // Johannes Baagoe <baagoe@baagoe.com>, 2010
     let s0 = 0;
     let s1 = 0;
@@ -47,7 +47,7 @@ export function Alea() {
     random.args = args;
     return random;
   })(Array.prototype.slice.call(arguments));
-};
+}
 
 const Mash = () => {
   let n = 0xefc8249d;
