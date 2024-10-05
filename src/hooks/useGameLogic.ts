@@ -43,12 +43,10 @@ export const useGameLogic = (settings: GameSettings) => {
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 5, z: 0 })
 
   const initializeEnvironment = useCallback(() => {
-    // Environment initialization logic
     alea.seed(settings.worldSeed)
   }, [alea, settings.worldSeed])
 
   const initializePlayer = useCallback(() => {
-    // Player initialization logic
     setPlayerPosition({ x: 0, y: 5, z: 0 })
   }, [])
 
@@ -56,14 +54,20 @@ export const useGameLogic = (settings: GameSettings) => {
     // Audio initialization logic
   }, [])
 
-  const update = useCallback(() => {
-    // Update logic
+  const updatePlayerPosition = useCallback((delta: number) => {
     if (gameMode === 'drive') {
       // Update player position for drive mode
+      setPlayerPosition(prev => ({
+        x: prev.x + delta * 10, // Move forward at constant speed
+        y: prev.y,
+        z: prev.z
+      }))
     } else if (gameMode === 'freeroam') {
       // Update player position for freeroam mode
+      // This could be controlled by user input
     }
-  }, [gameMode])
+    return playerPosition
+  }, [gameMode, playerPosition])
 
   useEffect(() => {
     initializeEnvironment()
@@ -75,5 +79,5 @@ export const useGameLogic = (settings: GameSettings) => {
     setGameMode(settings.mode)
   }, [settings.mode])
 
-  return { gameMode, perlin, alea, update, playerPosition }
+  return { gameMode, perlin, alea, playerPosition, updatePlayerPosition }
 }
