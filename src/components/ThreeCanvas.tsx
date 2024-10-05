@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import Perlin from '../utils/proc-noise';
-import Alea from '../utils/alea';
+import { Perlin } from '../utils/proc-noise';
+import { Alea } from '../utils/alea';
 import Terminal from './Terminal';
 import Controls from './Controls';
 import Settings from './Settings';
@@ -25,8 +25,8 @@ const ThreeCanvas: React.FC = () => {
         scene: new THREE.Scene(),
         camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer: new THREE.WebGLRenderer({ canvas }),
-        perlin: new Perlin(),
-        alea: new Alea(),
+        perlin: Perlin(),
+        alea: Alea(),
         player: null,
         audioListener: new THREE.AudioListener(),
         backgroundMusic: new THREE.Audio(new THREE.AudioListener()),
@@ -113,34 +113,59 @@ const ThreeCanvas: React.FC = () => {
           directionalLight.position.set(10, 20, 10);
           scene.add(directionalLight);
 
+          // Create ground
+          const groundGeometry = new THREE.PlaneGeometry(1000, 1000);
+          const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x1a5f1a });
+          const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+          ground.rotation.x = -Math.PI / 2;
+          scene.add(ground);
+
           // Generate simple buildings
-          for (let i = 0; i < 50; i++) {
-            const buildingGeometry = new THREE.BoxGeometry(2, Math.random() * 10 + 5, 2);
+          for (let i = 0; i < 100; i++) {
+            const buildingHeight = perlin.noise(i * 0.1, 0) * 20 + 10;
+            const buildingGeometry = new THREE.BoxGeometry(5, buildingHeight, 5);
             const buildingMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
             const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
             
-            const x = (perlin.noise(i, 0) - 0.5) * 100;
-            const z = (perlin.noise(0, i) - 0.5) * 100;
-            building.position.set(x, building.geometry.parameters.height / 2, z);
+            const x = (perlin.noise(i * 0.05, 0) - 0.5) * 200;
+            const z = (perlin.noise(0, i * 0.05) - 0.5) * 200;
+            building.position.set(x, buildingHeight / 2, z);
             
             scene.add(building);
+          }
+
+          // Add some trees
+          const treeGeometry = new THREE.ConeGeometry(2, 5, 8);
+          const treeMaterial = new THREE.MeshPhongMaterial({ color: 0x2d4c1e });
+          for (let i = 0; i < 200; i++) {
+            const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+            const x = (perlin.noise(i * 0.1, 100) - 0.5) * 300;
+            const z = (perlin.noise(100, i * 0.1) - 0.5) * 300;
+            tree.position.set(x, 2.5, z);
+            scene.add(tree);
           }
         },
 
         initializePlayer: () => {
-          const { camera, player } = window.game;
+          const { scene, camera, player } = window.game;
           if (gameMode === 'drive' && player) {
             player.add(camera);
             camera.position.set(0, 2, -5);
             camera.lookAt(player.position);
+            player.position.set(0, 0, 0);
+            scene.add(player);
+          } else {
+            // Free roam mode
+            camera.position.set(0, 10, 0);
+            camera.lookAt(0, 0, 0);
           }
         },
 
         initializeAudio: () => {
-          const { scene, audioListener, backgroundMusic } = window.game;
+          const { scene, camera, audioListener, backgroundMusic } = window.game;
           
           // Add audio listener to the camera
-          scene.add(audioListener);
+          camera.add(audioListener);
 
           // Load and play background music
           const audioLoader = new THREE.AudioLoader();
@@ -150,16 +175,36 @@ const ThreeCanvas: React.FC = () => {
             backgroundMusic.setVolume(0.5);
             backgroundMusic.play();
           });
+
+          // Add positional audio for car engine sound
+          if (window.game.player) {
+            const engineSound = new THREE.PositionalAudio(audioListener);
+            audioLoader.load('/audio/engine_sound.mp3', (buffer) => {
+              engineSound.setBuffer(buffer);
+              engineSound.setRefDistance(20);
+              engineSound.setLoop(true);
+              engineSound.setVolume(0.5);
+              engineSound.play();
+            });
+            window.game.player.add(engineSound);
+          }
         },
 
         update: () => {
-          const { player, perlin } = window.game;
-          if (player) {
-            // Simple player movement (can be expanded later)
-            const time = Date.now() * 0.001;
-            player.position.x = Math.sin(time) * 10;
-            player.position.z = Math.cos(time) * 10;
-            player.rotation.y = time;
+          const { player, camera } = window.game;
+          const time = Date.now() * 0.001;
+
+          if (gameMode === 'drive' && player) {
+            // Simple circular movement for the car
+            player.position.x = Math.sin(time * 0.5) * 50;
+            player.position.z = Math.cos(time * 0.5) * 50;
+            player.rotation.y = time * 0.5 + Math.PI / 2;
+          } else {
+            // Free roam camera movement
+            camera.position.y = 10 + Math.sin(time) * 2;
+            camera.position.x = Math.sin(time * 0.5) * 30;
+            camera.position.z = Math.cos(time * 0.5) * 30;
+            camera.lookAt(0, 0, 0);
           }
         }
       };

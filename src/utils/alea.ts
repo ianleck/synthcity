@@ -1,16 +1,16 @@
 // From http://baagoe.com/en/RandomMusings/javascript/
-function Alea() {
-  return (function(args) {
+export const Alea = () => {
+  return (function(this: any, ...args: any[]) {
     // Johannes Baagoe <baagoe@baagoe.com>, 2010
-    var s0 = 0;
-    var s1 = 0;
-    var s2 = 0;
-    var c = 1;
+    let s0 = 0;
+    let s1 = 0;
+    let s2 = 0;
+    let c = 1;
 
     if (args.length == 0) {
       args = [+new Date];
     }
-    var mash = Mash();
+    const mash = Mash();
     s0 = mash(' ');
     s1 = mash(' ');
     s2 = mash(' ');
@@ -31,7 +31,7 @@ function Alea() {
     }
     mash = null;
 
-    var random = function() {
+    const random = () => {
       var t = 2091639 * s0 + c * 2.3283064365386963e-10; // 2^-32
       s0 = s1;
       s1 = s2;
@@ -51,10 +51,10 @@ function Alea() {
   } (Array.prototype.slice.call(arguments)));
 };
 
-function Mash() {
-  var n = 0xefc8249d;
+const Mash = () => {
+  let n = 0xefc8249d;
 
-  var mash = function(data) {
+  const mash = (data: string) => {
     data = data.toString();
     for (var i = 0; i < data.length; i++) {
       n += data.charCodeAt(i);

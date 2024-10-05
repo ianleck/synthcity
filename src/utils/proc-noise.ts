@@ -3,7 +3,9 @@
 // https://github.com/processing/processing/blob/master/core/src/processing/core/PApplet.java
 // credit goes entirely to them. i just ported it to javascript.
 
-var Perlin = function(seed) {
+import { Alea } from './alea';
+
+export const Perlin = (seed?: number) => {
 	if (seed != undefined) {
 		this.alea_rand = new Alea(seed); // use provided seed
 	} else {
