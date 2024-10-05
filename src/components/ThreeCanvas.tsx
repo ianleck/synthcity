@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import Perlin from '../utils/proc-noise';
 import Alea from '../utils/alea';
 import Terminal from './Terminal';
@@ -26,33 +27,54 @@ const ThreeCanvas: React.FC = () => {
         renderer: new THREE.WebGLRenderer({ canvas }),
         perlin: new Perlin(),
         alea: new Alea(),
+        player: null,
+        audioListener: new THREE.AudioListener(),
+        backgroundMusic: new THREE.Audio(new THREE.AudioListener()),
 
         load: () => {
           console.log('Game loading...');
-          const { scene, camera, renderer, perlin } = window.game;
+          const { scene, camera, renderer } = window.game;
 
           renderer.setSize(window.innerWidth, window.innerHeight);
 
-          // Add a simple cube to the scene (placeholder for more complex objects)
-          const geometry = new THREE.BoxGeometry();
-          const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-          const cube = new THREE.Mesh(geometry, material);
-          scene.add(cube);
+          // Use LoadingManager for asset loading
+          const loadingManager = new THREE.LoadingManager();
+          loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+            const progress = (itemsLoaded / itemsTotal) * 100;
+            setLoadingProgress(progress);
+          };
+          loadingManager.onLoad = () => {
+            setShowSettings(false);
+            window.game.initializeEnvironment();
+            window.game.initializePlayer();
+            window.game.initializeAudio();
+          };
 
-          camera.position.z = 5;
+          // Load assets here (e.g., textures, models)
+          const textureLoader = new THREE.TextureLoader(loadingManager);
+          const gltfLoader = new GLTFLoader(loadingManager);
+
+          // Example: Load a texture
+          textureLoader.load('/textures/ground.jpg', (texture) => {
+            const groundMaterial = new THREE.MeshBasicMaterial({ map: texture });
+            const groundGeometry = new THREE.PlaneGeometry(100, 100);
+            const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+            groundMesh.rotation.x = -Math.PI / 2;
+            scene.add(groundMesh);
+          });
+
+          // Example: Load a 3D model
+          gltfLoader.load('/models/car.glb', (gltf) => {
+            window.game.player = gltf.scene;
+            scene.add(window.game.player);
+          });
+
+          camera.position.set(0, 5, 10);
+          camera.lookAt(0, 0, 0);
 
           const animate = () => {
             requestAnimationFrame(animate);
-
-            // Rotate the cube
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-
-            // Use Perlin noise to modify the cube's position
-            const time = Date.now() * 0.001;
-            cube.position.x = perlin.noise(time, 0) * 2;
-            cube.position.y = perlin.noise(0, time) * 2;
-
+            window.game.update();
             renderer.render(scene, camera);
           };
 
@@ -66,39 +88,79 @@ const ThreeCanvas: React.FC = () => {
 
           window.addEventListener('resize', handleResize);
 
-          // Simulate asset loading
-          let progress = 0;
-          const loadingInterval = setInterval(() => {
-            progress += 10;
-            setLoadingProgress(progress);
-            if (progress >= 100) {
-              clearInterval(loadingInterval);
-              setShowSettings(false);
-            }
-          }, 500);
-
           // Clean up function
           return () => {
             window.removeEventListener('resize', handleResize);
-            scene.remove(cube);
-            geometry.dispose();
-            material.dispose();
+            scene.traverse((object) => {
+              if (object instanceof THREE.Mesh) {
+                object.geometry.dispose();
+                object.material.dispose();
+              }
+            });
             renderer.dispose();
-            clearInterval(loadingInterval);
           };
         },
 
-        // Add more game-specific methods here
         initializeEnvironment: () => {
-          // Initialize game environment, terrain, etc.
+          const { scene, perlin } = window.game;
+
+          // Add ambient light
+          const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+          scene.add(ambientLight);
+
+          // Add directional light (sun)
+          const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+          directionalLight.position.set(10, 20, 10);
+          scene.add(directionalLight);
+
+          // Generate simple buildings
+          for (let i = 0; i < 50; i++) {
+            const buildingGeometry = new THREE.BoxGeometry(2, Math.random() * 10 + 5, 2);
+            const buildingMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+            const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+            
+            const x = (perlin.noise(i, 0) - 0.5) * 100;
+            const z = (perlin.noise(0, i) - 0.5) * 100;
+            building.position.set(x, building.geometry.parameters.height / 2, z);
+            
+            scene.add(building);
+          }
         },
 
         initializePlayer: () => {
-          // Initialize player character, controls, etc.
+          const { camera, player } = window.game;
+          if (gameMode === 'drive' && player) {
+            player.add(camera);
+            camera.position.set(0, 2, -5);
+            camera.lookAt(player.position);
+          }
+        },
+
+        initializeAudio: () => {
+          const { scene, audioListener, backgroundMusic } = window.game;
+          
+          // Add audio listener to the camera
+          scene.add(audioListener);
+
+          // Load and play background music
+          const audioLoader = new THREE.AudioLoader();
+          audioLoader.load('/audio/background_music.mp3', (buffer) => {
+            backgroundMusic.setBuffer(buffer);
+            backgroundMusic.setLoop(true);
+            backgroundMusic.setVolume(0.5);
+            backgroundMusic.play();
+          });
         },
 
         update: () => {
-          // Update game state, handle input, etc.
+          const { player, perlin } = window.game;
+          if (player) {
+            // Simple player movement (can be expanded later)
+            const time = Date.now() * 0.001;
+            player.position.x = Math.sin(time) * 10;
+            player.position.z = Math.cos(time) * 10;
+            player.rotation.y = time;
+          }
         }
       };
 
@@ -116,7 +178,7 @@ const ThreeCanvas: React.FC = () => {
         if (cleanup) cleanup();
       };
     }
-  }, []);
+  }, [gameMode]);
 
   const handleSettingsChange = (settings: any) => {
     setGameMode(settings.mode);
