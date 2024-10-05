@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import Perlin from '../utils/proc-noise';
 
 declare global {
   interface Window {
@@ -25,8 +26,29 @@ const ThreeCanvas: React.FC = () => {
 
           renderer.setSize(window.innerWidth, window.innerHeight);
 
+          // Add a simple cube to the scene
+          const geometry = new THREE.BoxGeometry();
+          const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+          const cube = new THREE.Mesh(geometry, material);
+          scene.add(cube);
+
+          camera.position.z = 5;
+
+          // Initialize Perlin noise
+          const perlin = new Perlin();
+
           const animate = () => {
             requestAnimationFrame(animate);
+
+            // Rotate the cube
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+
+            // Use Perlin noise to modify the cube's position
+            const time = Date.now() * 0.001;
+            cube.position.x = perlin.noise(time, 0) * 2;
+            cube.position.y = perlin.noise(0, time) * 2;
+
             renderer.render(scene, camera);
           };
 
@@ -43,6 +65,9 @@ const ThreeCanvas: React.FC = () => {
           // Clean up function
           return () => {
             window.removeEventListener('resize', handleResize);
+            scene.remove(cube);
+            geometry.dispose();
+            material.dispose();
             renderer.dispose();
           };
         }
