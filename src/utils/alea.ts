@@ -1,6 +1,6 @@
 // From http://baagoe.com/en/RandomMusings/javascript/
 export const Alea = () => {
-  return (function(this: any, ...args: any[]) {
+  return (function (this: any, ...args: any[]) {
     // Johannes Baagoe <baagoe@baagoe.com>, 2010
     let s0 = 0;
     let s1 = 0;
@@ -8,12 +8,12 @@ export const Alea = () => {
     let c = 1;
 
     if (args.length == 0) {
-      args = [+new Date];
+      args = [+new Date()];
     }
-    const mash = Mash();
-    s0 = mash(' ');
-    s1 = mash(' ');
-    s2 = mash(' ');
+    let mash = Mash();
+    s0 = mash(" ");
+    s1 = mash(" ");
+    s2 = mash(" ");
 
     for (var i = 0; i < args.length; i++) {
       s0 -= mash(args[i]);
@@ -35,20 +35,18 @@ export const Alea = () => {
       var t = 2091639 * s0 + c * 2.3283064365386963e-10; // 2^-32
       s0 = s1;
       s1 = s2;
-      return s2 = t - (c = t | 0);
+      return (s2 = t - (c = t | 0));
     };
-    random.uint32 = function() {
+    random.uint32 = function () {
       return random() * 0x100000000; // 2^32
     };
-    random.fract53 = function() {
-      return random() + 
-        (random() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
+    random.fract53 = function () {
+      return random() + ((random() * 0x200000) | 0) * 1.1102230246251565e-16; // 2^-53
     };
-    random.version = 'Alea 0.9';
+    random.version = "Alea 0.9";
     random.args = args;
     return random;
-
-  } (Array.prototype.slice.call(arguments)));
+  })(Array.prototype.slice.call(arguments));
 };
 
 const Mash = () => {
@@ -69,6 +67,6 @@ const Mash = () => {
     return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
   };
 
-  mash.version = 'Mash 0.9';
+  mash.version = "Mash 0.9";
   return mash;
-}
+};
