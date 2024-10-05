@@ -4,19 +4,21 @@ SynthCity is an interactive WebGL experience built with [Three.js](https://three
 
 ![Screenshot](https://jeff-beene.com/synthcity/screenshots/readme.jpg)
 
-## Setup
+## Next.js Setup
 
-- Requirements: [node.js](https://nodejs.org/en) and [webpack.js](https://webpack.js.org/). Try to use the latest versions of both.
-- Pull the repo
-- Run `npm install` to install dependencies
-- Setup your local server if you don't already have one. For Node, you can use [http-server](https://www.npmjs.com/package/http-server)
-- Run the local server in the root directory of the repo `http-server`.
-- Enjoy!
+This project now uses Next.js. To run the development server:
 
-## Modifications
+1. Install dependencies:
+   ```
+   npm install
+   ```
 
-- When making modifications to `src`, run `npm run build`
-- Update `index.html` to include the appropriate `main.[hash].js` file
+2. Run the development server:
+   ```
+   npm run dev
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Credits
 
