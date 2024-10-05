@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import React, { useRef } from 'react'
+import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera, OrbitControls } from '@react-three/drei'
 import { GameSettings } from '../types/GameSettings'
 import { useGameLogic } from '../hooks/useGameLogic'
@@ -13,19 +13,14 @@ interface SceneProps {
 }
 
 const Scene: React.FC<SceneProps> = ({ settings }) => {
-  const { scene, camera } = useThree()
-  const { gameMode, perlin, alea, update, playerPosition } = useGameLogic(settings)
-
-  useFrame(() => {
-    update()
-  })
+  const { perlin } = useGameLogic(settings)
 
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 20, 10]} intensity={0.8} />
       <Ground />
-      <Player position={playerPosition} />
+      <Player settings={settings} />
       {Array.from({ length: 100 }).map((_, i) => (
         <Building
           key={`building-${i}`}
@@ -61,7 +56,7 @@ const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ settings }) => {
   return (
     <Canvas ref={canvasRef}>
       <Scene settings={settings} />
-      <PerspectiveCamera makeDefault fov={75} position={[0, 5, 10]} />
+      <PerspectiveCamera makeDefault fov={75} position={[0, 10, 20]} />
       <OrbitControls />
     </Canvas>
   )
