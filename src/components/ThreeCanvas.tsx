@@ -19,7 +19,6 @@ const ThreeCanvas: React.FC = () => {
       window.game = {
         load: () => {
           console.log('Game loading...');
-          // Here you would typically initialize your Three.js scene, camera, renderer, etc.
           const scene = new THREE.Scene();
           const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
           const renderer = new THREE.WebGLRenderer({ canvas });
@@ -44,6 +43,7 @@ const ThreeCanvas: React.FC = () => {
           // Clean up function
           return () => {
             window.removeEventListener('resize', handleResize);
+            renderer.dispose();
           };
         }
       };
@@ -61,7 +61,7 @@ const ThreeCanvas: React.FC = () => {
     }
   }, []);
 
-  return <canvas ref={canvasRef} id="canvas" />;
+  return <canvas ref={canvasRef} id="canvas" style={{ opacity: 0 }} />;
 };
 
 export default ThreeCanvas;

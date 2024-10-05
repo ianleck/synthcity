@@ -11,7 +11,7 @@ export default function Home() {
         <title>SynthCity</title>
         <meta name="description" content="An interactive audiovisual experience by Jeff Beene"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-        <meta http-equiv="expires" content="0"/>
+        <meta httpEquiv="expires" content="0"/>
         <meta property="og:image" content="https://jeff-beene.com/synthcity/img/social.jpg"/>
         <meta property="og:image:type" content="image/jpg"/>
         <meta property="og:image:width" content="1200"/>
@@ -39,8 +39,8 @@ export default function Home() {
               <div className="tRow" style={{height: '25%'}}>
                 <div className="tHeader">#Settings</div>
                 <div id="settings" style={{display: 'none'}}>
-                  <div id="settingsLockMessage" className="g1" style={{display: 'none', marginBottom: '10px'}}>
-                    &gt;&gt; Settings locked: refresh page to unlock
+                  <div id="settingsLockMessage" className="g1" style={{display:'none', marginBottom:'10px'}}>
+                    >> Settings locked: refresh page to unlock
                   </div>
                   <div style={{marginBottom: '5px'}}>
                     <span>Mode:</span>
@@ -68,7 +68,7 @@ export default function Home() {
                       <span className="checkmark">[Custom]</span>
                     </label>
                   </div>
-                  <div id="settingsWorldSeedValueContainer" style={{display: 'none', marginBottom: '5px'}}>
+                  <div id="settingsWorldSeedValueContainer" style={{display:'none', marginBottom: '5px'}}>
                     <span>Seed:</span>
                     <input type="number" id="settingsWorldSeedValue" name="settingsWorldSeedValue" defaultValue="0"/>
                   </div>
