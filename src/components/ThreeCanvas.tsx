@@ -6,6 +6,7 @@ import { useGameLogic } from '../hooks/useGameLogic'
 import { Ground } from './Ground'
 import { Building } from './Building'
 import { Tree } from './Tree'
+import { Player } from './Player'
 
 interface SceneProps {
   settings: GameSettings
@@ -13,7 +14,7 @@ interface SceneProps {
 
 const Scene: React.FC<SceneProps> = ({ settings }) => {
   const { scene, camera } = useThree()
-  const { gameMode, perlin, alea, update } = useGameLogic(settings)
+  const { gameMode, perlin, alea, update, playerPosition } = useGameLogic(settings)
 
   useFrame(() => {
     update()
@@ -24,6 +25,7 @@ const Scene: React.FC<SceneProps> = ({ settings }) => {
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 20, 10]} intensity={0.8} />
       <Ground />
+      <Player position={playerPosition} />
       {Array.from({ length: 100 }).map((_, i) => (
         <Building
           key={`building-${i}`}
