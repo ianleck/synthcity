@@ -1,26 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { curatedWorldSeeds } from '../utils/ui-utils';
+import React, { useState, useEffect } from 'react'
+import { curatedWorldSeeds } from '../utils/ui-utils'
+import { GameSettings } from '../types/GameSettings'
 
 interface SettingsProps {
-  onSettingsChange: (settings: any) => void;
+  onSettingsChange: (settings: GameSettings) => void
 }
 
-const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
-  const [mode, setMode] = useState('drive');
-  const [worldSeedType, setWorldSeedType] = useState('curated');
-  const [worldSeedValue, setWorldSeedValue] = useState('');
-  const [renderScaling, setRenderScaling] = useState('1');
-  const [windshieldShader, setWindshieldShader] = useState('on');
+export const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
+  const [settings, setSettings] = useState<GameSettings>({
+    mode: 'drive',
+    worldSeed: curatedWorldSeeds[Math.floor(Math.random() * curatedWorldSeeds.length)],
+    renderScaling: 1,
+    windshieldShader: true,
+  })
 
   useEffect(() => {
-    const settings = {
-      mode,
-      worldSeed: worldSeedType === 'custom' ? worldSeedValue : curatedWorldSeeds[Math.floor(Math.random() * curatedWorldSeeds.length)],
-      renderScaling,
-      windshieldShader: windshieldShader === 'on',
-    };
-    onSettingsChange(settings);
-  }, [mode, worldSeedType, worldSeedValue, renderScaling, windshieldShader]);
+    onSettingsChange(settings)
+  }, [settings, onSettingsChange])
+
+  const handleModeChange = (mode: 'drive' | 'freeroam') => {
+    setSettings(prev => ({ ...prev, mode }))
+  }
+
+  const handleWorldSeedChange = (seedType: string) => {
+    let worldSeed: number
+    if (seedType === 'curated') {
+      worldSeed = curatedWorldSeeds[Math.floor(Math.random() * curatedWorldSeeds.length)]
+    } else if (seedType === 'random') {
+      worldSeed = Math.floor(Math.random() * 1000000)
+    } else {
+      worldSeed = settings.worldSeed
+    }
+    setSettings(prev => ({ ...prev, worldSeed }))
+  }
+
+  const handleRenderScalingChange = (renderScaling: number) => {
+    setSettings(prev => ({ ...prev, renderScaling }))
+  }
+
+  const handleWindshieldShaderChange = (windshieldShader: boolean) => {
+    setSettings(prev => ({ ...prev, windshieldShader }))
+  }
 
   return (
     <div id="settings">
@@ -32,8 +52,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsMode"
             value="drive"
-            checked={mode === 'drive'}
-            onChange={() => setMode('drive')}
+            checked={settings.mode === 'drive'}
+            onChange={() => handleModeChange('drive')}
           />
           Drive
         </label>
@@ -42,8 +62,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsMode"
             value="freeroam"
-            checked={mode === 'freeroam'}
-            onChange={() => setMode('freeroam')}
+            checked={settings.mode === 'freeroam'}
+            onChange={() => handleModeChange('freeroam')}
           />
           Free Roam
         </label>
@@ -55,8 +75,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsWorldSeed"
             value="curated"
-            checked={worldSeedType === 'curated'}
-            onChange={() => setWorldSeedType('curated')}
+            checked={curatedWorldSeeds.includes(settings.worldSeed)}
+            onChange={() => handleWorldSeedChange('curated')}
           />
           Curated
         </label>
@@ -65,8 +85,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsWorldSeed"
             value="random"
-            checked={worldSeedType === 'random'}
-            onChange={() => setWorldSeedType('random')}
+            checked={!curatedWorldSeeds.includes(settings.worldSeed)}
+            onChange={() => handleWorldSeedChange('random')}
           />
           Random
         </label>
@@ -75,18 +95,16 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsWorldSeed"
             value="custom"
-            checked={worldSeedType === 'custom'}
-            onChange={() => setWorldSeedType('custom')}
+            checked={false}
+            onChange={() => handleWorldSeedChange('custom')}
           />
           Custom
         </label>
-        {worldSeedType === 'custom' && (
-          <input
-            type="number"
-            value={worldSeedValue}
-            onChange={(e) => setWorldSeedValue(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          value={settings.worldSeed}
+          onChange={(e) => setSettings(prev => ({ ...prev, worldSeed: parseInt(e.target.value) }))}
+        />
       </div>
       <div>
         <h3>Render Scaling</h3>
@@ -95,8 +113,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsRenderScaling"
             value="1"
-            checked={renderScaling === '1'}
-            onChange={() => setRenderScaling('1')}
+            checked={settings.renderScaling === 1}
+            onChange={() => handleRenderScalingChange(1)}
           />
           1x
         </label>
@@ -105,8 +123,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsRenderScaling"
             value="0.5"
-            checked={renderScaling === '0.5'}
-            onChange={() => setRenderScaling('0.5')}
+            checked={settings.renderScaling === 0.5}
+            onChange={() => handleRenderScalingChange(0.5)}
           />
           0.5x
         </label>
@@ -118,8 +136,8 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsWindshieldShader"
             value="on"
-            checked={windshieldShader === 'on'}
-            onChange={() => setWindshieldShader('on')}
+            checked={settings.windshieldShader}
+            onChange={() => handleWindshieldShaderChange(true)}
           />
           On
         </label>
@@ -128,15 +146,13 @@ const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
             type="radio"
             name="settingsWindshieldShader"
             value="off"
-            checked={windshieldShader === 'off'}
-            onChange={() => setWindshieldShader('off')}
+            checked={!settings.windshieldShader}
+            onChange={() => handleWindshieldShaderChange(false)}
           />
           Off
         </label>
       </div>
       <button id="enterBtn">Enter</button>
     </div>
-  );
-};
-
-export default Settings;
+  )
+}
