@@ -13,7 +13,6 @@ import {
   AmbientLight,
   PointLight,
   Audio,
-  AudioLoader,
   AudioListener
 } from 'three';
 
@@ -24,7 +23,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 
-import { AssetManager } from './AssetManager';
+import { assetLoader } from './AssetLoader';
 import { Player } from './Player';
 import { PlayerCar } from './PlayerCar';
 import { PlayerController } from './PlayerController';
@@ -38,27 +37,87 @@ import { Collider } from './Collider';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 
 export class Game {
-  // Add all the properties from the original Game class
+  private canvas: HTMLCanvasElement;
+  private scene: Scene;
+  private camera: PerspectiveCamera;
+  private renderer: WebGLRenderer;
+  private clock: Clock;
+  private composer: EffectComposer;
+  private assets: any;
 
   constructor(canvas: HTMLCanvasElement) {
-    // Initialize properties and set up the game
+    this.canvas = canvas;
+    this.scene = new Scene();
+    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.renderer = new WebGLRenderer({ canvas: this.canvas });
+    this.clock = new Clock();
+    
+    // Initialize other properties as needed
   }
 
-  load() {
-    // Load assets
+  async load() {
+    try {
+      this.assets = await assetLoader.loadAllAssets();
+      this.init();
+    } catch (error) {
+      console.error('Failed to load assets:', error);
+    }
   }
 
   init() {
-    // Initialize the game
+    // Set up renderer
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.toneMapping = ACESFilmicToneMapping;
+    this.renderer.outputColorSpace = SRGBColorSpace;
+
+    // Set up scene
+    this.scene.fog = new Fog(0x000000, 1, 1000);
+
+    // Set up camera
+    this.camera.position.set(0, 2, 5);
+
+    // Set up lights
+    const ambientLight = new AmbientLight(0x404040);
+    this.scene.add(ambientLight);
+
+    const directionalLight = new DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, 1);
+    this.scene.add(directionalLight);
+
+    // Set up post-processing
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    this.composer.addPass(bloomPass);
+
+    const fxaaPass = new ShaderPass(FXAAShader);
+    fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * window.devicePixelRatio);
+    fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * window.devicePixelRatio);
+    this.composer.addPass(fxaaPass);
+
+    // Initialize game objects, player, etc.
+    // Use this.assets to access loaded audio files
+
+    this.animate();
   }
 
   animate() {
-    // Game loop
-  }
+    requestAnimationFrame(() => this.animate());
 
-  // Add all other methods from the original Game class
+    const delta = this.clock.getDelta();
+
+    // Update game logic here
+
+    this.composer.render();
+  }
 
   dispose() {
     // Clean up resources when component unmounts
+    this.renderer.dispose();
+    this.composer.dispose();
+    // Dispose of other resources as needed
   }
 }
