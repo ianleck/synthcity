@@ -4,3 +4,9 @@ export interface GameSettings {
   renderScaling: number
   windshieldShader: boolean
 }
+export interface GameSettings {
+  mode: 'drive' | 'freeroam'
+  worldSeed: number
+  renderScaling: number
+  windshieldShader: boolean
+}
