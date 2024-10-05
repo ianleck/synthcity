@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#blocker, #crashMessage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+#container {
+  /* Add styles for the container */
+}
+
+.g1 {
+  /* Add styles for the crash message */
+}
